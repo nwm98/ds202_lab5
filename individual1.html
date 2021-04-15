@@ -266,6 +266,7 @@ perMDVRes &lt;- perMDV %&gt;%
 <p>Answer:</p>
 <p>5.Join the accident and person table (work out which varaible(s) to use)</p>
 <p>Answer:</p>
+<pre class="r"><code>accper &lt;- full_join(acc, per, by=&quot;ST_CASE&quot;)</code></pre>
 <p>6.Tally the number of accidents by day of the week (Day_WEEK), hour of the day (HOUR) and gender (SEX). Visualize the results and explain what you find.</p>
 <p>Answer:</p>
 <p>7.Now plot a choropleth map of the number of deaths on a county level. Also explain what you find.</p>
@@ -274,6 +275,55 @@ perMDVRes &lt;- perMDV %&gt;%
 <li>Is summer or winter more dangerous? Does this depend on states? Explore and explain.</li>
 </ol>
 <p>Answer:</p>
+<pre class="r"><code>accWin &lt;- acc %&gt;%
+          filter(MONTH == 12 | MONTH == 1 | MONTH == 2)
+
+accSum &lt;- acc %&gt;%
+          filter(MONTH == 6 | MONTH == 7 | MONTH == 8 | MONTH == 9)
+
+length(accWin$ST_CASE)</code></pre>
+<pre><code>## [1] 7733</code></pre>
+<pre class="r"><code>length(accSum$ST_CASE)</code></pre>
+<pre><code>## [1] 12273</code></pre>
+<pre class="r"><code>perWin &lt;- per %&gt;%
+                filter(MONTH == 12 | MONTH == 1 | MONTH == 2)
+
+perSum &lt;- per %&gt;%
+            filter(MONTH == 6 | MONTH == 7 | MONTH == 8 | MONTH == 9)
+
+perWinFatal &lt;- perWin %&gt;%
+                  filter(INJ_SEV == 4)
+
+perSumFatal &lt;- perSum %&gt;%
+                filter(INJ_SEV == 4)
+
+percWinFatal &lt;- length(perWinFatal$MONTH) / length(perWin$MONTH)
+percSumFatal &lt;- length(perSumFatal$MONTH) / length(perSum$MONTH)
+
+perWinCount &lt;- perWin %&gt;%
+                group_by(STATE, INJ_SEV) %&gt;%
+                summarise(win_Count = n())</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;STATE&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>perSumCount &lt;- perSum %&gt;%
+                group_by(STATE, INJ_SEV) %&gt;%
+                summarise(sum_Count = n())</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;STATE&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code>perInjCount &lt;- full_join(perWinCount, perSumCount, by = c(&quot;STATE&quot;, &quot;INJ_SEV&quot;))
+
+perWinStateCount &lt;- perWin %&gt;%
+                      group_by(STATE) %&gt;%
+                      summarise(winST_count = n())
+
+perSumStateCount &lt;- perSum %&gt;%
+                    group_by(STATE) %&gt;%
+                    summarise(sumST_count = n())
+
+perWinSumSTCount &lt;- full_join(perWinStateCount, perSumStateCount, by = &quot;STATE&quot;)
+
+perInjCountPer &lt;- full_join(perInjCount, perWinSumSTCount, by = &quot;STATE&quot;)
+
+perInj &lt;- perInjCountPer %&gt;%
+          mutate(winPercentage = win_Count / winST_count, sumPercentage = sum_Count / sumST_count)</code></pre>
 
 
 
