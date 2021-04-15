@@ -69,8 +69,9 @@ head(join)
 Answer:
 ```{r}
 join$DAY_WEEK <- wday(join$DAY_WEEK, label=TRUE)
+tally2<-join %>% group_by(DAY_WEEK, HOUR.x, SEX) %>% summarize(count=n())
 tally<- summarize(group_by(join,DAY_WEEK, HOUR.x, SEX),count=n())
-ggplot(tally, aes(x=HOUR.x, y=count, group=SEX))+geom_line(color=tally$SEX)+geom_text_repel(aes(x=HOUR.x,y=count,label=SEX))+facet_wrap(~DAY_WEEK)+xlim(0,24)
+ggplot(tally2, aes(x=HOUR.x, y=count, group=SEX))+geom_line(color=tally$SEX)+geom_text_repel(aes(x=HOUR.x,y=count,label=SEX))+facet_wrap(~DAY_WEEK)+xlim(0,24)
 ```
 This faceted graph shows that males are more likely to be in an accident no matter what the time is. This also shows that crashes are more frequent on the weekends closer to the end of the day. This is likely due to people partying on their days off and attempting to drive home when they're done.
 
